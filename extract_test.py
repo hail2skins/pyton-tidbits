@@ -15,5 +15,5 @@ def extract_contributions(pdf_path):
 # Example usage
 pdf_path = './jensen.pdf'
 extracted_data = extract_contributions(pdf_path)
-for data in extracted_data[:100]:
+for data in extracted_data:
     print(f"Individual: {data} \n")
