@@ -9,11 +9,12 @@ def extract_contributions(pdf_path):
             text = page.extract_text()
             if text:
                 contributions = re.findall(r'(In Kind \b[A-Za-z\s,]+\b\s*Total Cash Date\s*(?:[^\n]*\n)+?.*?Total)', text, re.DOTALL)
+                #contributions = re.findall(r'(In Kind (.*?), (.*) Total)', text, re.DOTALL) # This regex returns less specific/good data.
                 text_data.extend(contributions)
         return text_data
 
 # Example usage
-pdf_path = './jensen.pdf'
+pdf_path = './pdf_extraction/jensen.pdf'
 extracted_data = extract_contributions(pdf_path)
 for data in extracted_data:
     print(f"Individual: {data} \n")
