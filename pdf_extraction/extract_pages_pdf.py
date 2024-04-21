@@ -13,9 +13,9 @@ def extract_text_from_specific_pages(pdf_path, start_page, end_page):
     return text_data
 
 # Example usage
-pdf_path = './jensen.pdf'
-start_page = 8
-end_page = 9
+pdf_path = './pdf_extraction/jensen.pdf'
+start_page = 1
+end_page = 1
 extracted_text = extract_text_from_specific_pages(pdf_path, start_page, end_page)
 for page_text in extracted_text:
     print(page_text[:1000])
