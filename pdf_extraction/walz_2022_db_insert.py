@@ -27,48 +27,46 @@ def connect_db():
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     return conn
 
-def insert_data(conn, data, entity_id=1):  # Default entity_id to 1
+def insert_data(conn, data, entity_id=1):
     cursor = conn.cursor()
     review_count = 0
     for donor in data:
         try:
-            # Ensure all required fields are present
-            if not all(k in donor for k in ('last_name', 'first_name', 'street_number', 'street_name', 'city', 'state', 'zip_code', 'needs_review', 'contributions')):
-                print("Missing data fields in donor information, skipping:", donor)
+            if not isinstance(donor, dict):
+                raise TypeError("Donor data must be a dictionary.")
+            if not donor['contributions']:
+                print(f"No contributions to insert for {donor['first_name']} {donor['last_name']}")
                 continue
 
-            # Insert into donors table as before
             cursor.execute("""
                 INSERT INTO donors_donor (last_name, first_name, street_number, street_name, city, state, zip_code, needs_review) 
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
             """, (donor['last_name'], donor['first_name'], donor['street_number'], donor['street_name'], donor['city'], donor['state'], donor['zip_code'], donor['needs_review']))
             donor_id = cursor.fetchone()[0]
-            
+
             for contribution in donor['contributions']:
-                # Include entity_id in the INSERT statement
                 cursor.execute("""
                     INSERT INTO donors_contribution (donor_id, entity_id, date, amount) 
                     VALUES (%s, %s, %s, %s)
                 """, (donor_id, entity_id, contribution['date'], contribution['amount']))
-        except KeyError as e:
-            print(f"Key error: {e} in donor data, please check the data structure.")
-            review_count += 1
+
         except Exception as e:
-            print(f"Unexpected error: {e}, rolling back transaction.")
+            print(f"Error processing donor: {str(e)}")
+            print("Data causing error:", donor)
+            review_count += 1
             conn.rollback()
-            continue
+            continue  # Skip to the next donor
 
     conn.commit()
     cursor.close()
-    print(f"All data has been successfully inserted. {review_count} addresses need review.")
+    print(f"All data has been successfully inserted, except for {review_count} entries which need review.")
     return review_count
-
 
 
 
 def validate_date(date_text):
     try:
-        datetime.datetime.strptime(date_text, '%m/%d/%y')  # Check if date is in the correct format
+        datetime.datetime.strptime(date_text, '%m/%d/%Y')  # Correct format with four-digit year
         return True
     except ValueError:
         return False
@@ -146,7 +144,7 @@ def extract_contributions(pdf_path):
                                 'amount': cash.replace(',', '')  # Remove commas for validation or database storage
                             }
                             contributions_list.append(contribution_detail)
-                            print(f"Adding Contribution: {contribution_detail}")  # Print each contribution detail
+                            #print(f"Adding Contribution: {contribution_detail}")  # Print each contribution detail
 
                     data_dict['contributions'] = contributions_list
                     
@@ -154,7 +152,7 @@ def extract_contributions(pdf_path):
                     if not contributions_list:
                         review_count += 1
 
-                    print("Data Dictionary for Insertion:")
+                    #print("Data Dictionary for Insertion:")
                     print(data_dict)  # Display the complete data dictionary for each donor
         return data, review_count
 
@@ -164,11 +162,11 @@ def extract_contributions(pdf_path):
 if __name__ == "__main__":
     conn = connect_db()
     pdf_path = './pdf_extraction/walz.pdf'
-    extracted_data = extract_contributions(pdf_path)
-    print(f"Extracted {len(extracted_data)} donors.")
-    
+    extracted_data, review_count = extract_contributions(pdf_path)  # Ensure this matches your function's return
+    print("Sample of extracted data:", extracted_data[:2])  # Print first two entries for inspection
+
     if extracted_data:
-        review_count = insert_data(conn, extracted_data, entity_id=2)  # Pass the entity_id here if different from 1
-        print(f"{review_count} addresses need review.")
+        review_count = insert_data(conn, extracted_data, entity_id=2)
+        print(f"{review_count} entries need review.")
     
     conn.close()
