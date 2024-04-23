@@ -1,5 +1,4 @@
+*.env
 *files
 files*
-*.pdf
-donors_db.py
-donors_dev_db.py
+.pdf

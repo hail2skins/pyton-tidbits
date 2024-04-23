@@ -48,9 +48,6 @@ import datetime
 #         return data
 
 
-import re
-import datetime
-
 def validate_date(date_text):
     try:
         datetime.datetime.strptime(date_text, '%m/%d/%y')  # Check if date is in the correct format
