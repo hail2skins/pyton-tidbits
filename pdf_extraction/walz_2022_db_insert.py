@@ -17,12 +17,22 @@ def connect_db():
     # conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     # return conn
     
+    # # Connect to the PostgreSQL server
+    # conn = psycopg2.connect(
+    #     host=config('DEV_DB_HOST'),
+    #     dbname=config('DEV_DB_NAME'),
+    #     user=config('DEV_DB_USER'),
+    #     password=config('DEV_DB_PASSWORD')
+    #     )
+    # conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
+    # return conn
+    
     # Connect to the PostgreSQL server
     conn = psycopg2.connect(
-        host=config('DEV_DB_HOST'),
-        dbname=config('DEV_DB_NAME'),
-        user=config('DEV_DB_USER'),
-        password=config('DEV_DB_PASSWORD')
+        host=config('PROD_DB_HOST'),
+        dbname=config('PROD_DB_NAME'),
+        user=config('PROD_DB_USER'),
+        password=config('PROD_DB_PASSWORD')
         )
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     return conn
